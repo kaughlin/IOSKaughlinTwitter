@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 // MARK: Properties
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSString *screenName;
+@property (strong, nonatomic) NSURL *profilePicURL;
+@property (strong, nonatomic) NSURL *backdropURL;
 
 // Create initializer- sets all properties baed on dictionary
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary;

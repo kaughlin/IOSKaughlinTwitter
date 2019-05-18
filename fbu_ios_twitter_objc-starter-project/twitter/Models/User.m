@@ -13,10 +13,14 @@
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary {
     self = [super init];
     if (self) {
+        // Initialize properties
         self.name = dictionary[@"name"];
         self.screenName = dictionary[@"screen_name"];
+        NSMutableString *profilePicString = [NSMutableString stringWithString:dictionary[@"profile_image_url"]];
+        [profilePicString insertString:@"s" atIndex:4];
+        self.profilePicURL = [NSURL URLWithString:profilePicString];
+        self.backdropURL = [NSURL URLWithString:dictionary[@"profile_banner_url"]];
         
-        // Initialize any other properties
     }
     return self;
 }
