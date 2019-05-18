@@ -16,6 +16,7 @@
 
 @property (weak, nonatomic) IBOutlet UITableView *timelineTableView;
 @property (strong, nonatomic) NSMutableArray *tweetsArray;
+@property (nonatomic, strong) UIRefreshControl *refreshControl;
 
 @end
 
@@ -24,30 +25,37 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    //bind action to refresh control
+    [self.refreshControl addTarget:self action:@selector(refreshTimeline) forControlEvents:UIControlEventValueChanged];
+    // add refresh control to table view
+    [self.timelineTableView insertSubview:self.refreshControl atIndex:0];
+    
     self.timelineTableView.dataSource = self;
     self.timelineTableView.delegate = self;
     
-    // Get timeline
-    [[APIManager shared] getHomeTimelineWithCompletion:^(NSArray *tweets, NSError *error) {
-        if (tweets) {
-            NSLog(@"😎😎😎 Successfully loaded home timeline");
-            
-            self.tweetsArray = (NSMutableArray *) tweets;
-            NSLog(@"Count %lu:", self.tweetsArray.count);
-            for (Tweet *t in self.tweetsArray) {
-                NSLog(@"Tweeeet in all tweets:   %@", t.text);
-            }
-        } else {
-            NSLog(@"😫😫😫 Error getting home timeline: %@", error.localizedDescription);
-        }
-        //reload data after network call
-        [self.timelineTableView reloadData];
-    }];
+    [self refreshTimeline];
+    
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)refreshTimeline {
+    // Get timeline
+    [[APIManager shared] getHomeTimelineWithCompletion:^(NSArray *tweets, NSError *error) {
+        if (tweets) {
+            NSLog(@"😎😎😎 Successfully loaded home timeline");
+            self.tweetsArray = (NSMutableArray *) tweets;
+        } else {
+            NSLog(@"😫😫😫 Error getting home timeline: %@",error.localizedDescription);
+        }
+        //reload data after network call
+        [self.timelineTableView reloadData];
+        [self.refreshControl endRefreshing];
+    }];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
@@ -66,6 +74,8 @@
     
     NSLog(@"tweet.user.profilePicURL is: %@", tweet.user.profilePicURL);
     [cell.profilePicImageView setImageWithURL:tweet.user.profilePicURL];
+    
+    //make profile image circular
     cell.profilePicImageView.layer.cornerRadius = cell.profilePicImageView.frame.size.width / 2;
     cell.profilePicImageView.clipsToBounds = YES;
     cell.profilePicImageView.layer.masksToBounds = YES;
